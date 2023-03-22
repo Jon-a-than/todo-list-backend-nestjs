@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common'
+import { Body, Controller, Post, Get, Param } from '@nestjs/common'
 import type { RegisterInfo } from '../types/user.type'
 import { RegisterService } from './register.service'
 
@@ -7,12 +7,12 @@ export class RegisterController {
   constructor(private readonly registerService: RegisterService) {}
 
   @Post()
-  register(@Body() { user, code }: RegisterInfo) {
-    return this.registerService.register(user, code)
+  async register(@Body() { user, pwd1, pwd2, phone, code }: RegisterInfo) {
+    return await this.registerService.register(user, pwd1, pwd2, phone, code)
   }
 
-  @Post('code')
-  sendCode(@Body() { phone }: { phone: string }) {
+  @Get('/:phone')
+  sendCode(@Param('phone') phone: string) {
     return this.registerService.sendCode(phone)
   }
 }
