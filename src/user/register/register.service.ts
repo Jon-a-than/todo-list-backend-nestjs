@@ -97,6 +97,8 @@ export class RegisterService extends PhoneCodeModule {
     phone: string,
     code: number,
   ): Promise<ResponseData> {
+    if (!(user && pwd1 && pwd2 && phone && code))
+      return defineResponseData('参数不完整', Status.PARAM_LESS)
     if (pwd1 !== pwd2) {
       return defineResponseData('密码不一致', Status.PARAM_ERROR)
     } else if (user.length < 3 || user.length > 16) {
