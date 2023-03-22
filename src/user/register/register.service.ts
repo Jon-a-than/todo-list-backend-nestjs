@@ -60,33 +60,31 @@ export class RegisterService extends PhoneCodeModule {
     super()
   }
 
-  async hasRegistered(user: string, phone: string): Promise<Status> {
-    const hasUserRegistered = await this.connection.collection('user').findOne({
-      $or: [{ user }],
-    })
-    if (hasUserRegistered) return Status.USER_EXIST
+  async findOne(filter: object): Promise<null | object> {
+    return await this.connection.collection('user').findOne(filter)
+  }
 
-    const hasPhoneRegistered = await this.connection
+  async insertOne(data: object): Promise<boolean> {
+    const { acknowledged } = await this.connection
       .collection('user')
-      .findOne({
-        $or: [{ phone }],
-      })
-    if (hasPhoneRegistered) return Status.PHONE_EXIST
+      .insertOne(data)
 
+    return acknowledged
+  }
+
+  async hasRegistered(user: string, phone: string): Promise<Status> {
+    const hasUserRegistered = await this.findOne({ user })
+    if (hasUserRegistered) return Status.USER_EXIST
+    const hasPhoneRegistered = await this.findOne({ phone })
+    if (hasPhoneRegistered) return Status.PHONE_EXIST
     return Status.SUCCESS
   }
 
   async addUser(user: string, phone: string, pwd: string): Promise<boolean> {
-    const hasRegistered = await this.connection.collection('user').findOne({
-      $or: [{ user }, { phone }],
-    })
+    const hasRegistered = await this.findOne({ $or: [{ user }, { phone }] })
     if (hasRegistered) return false
 
-    const { acknowledged } = await this.connection
-      .collection('user')
-      .insertOne({ user, phone, pwd })
-
-    return acknowledged
+    return await this.insertOne({ user, phone, pwd })
   }
 
   /**
@@ -139,6 +137,10 @@ export class RegisterService extends PhoneCodeModule {
 
   /** @TODO 短信发送验证码 */
   sendCode(phone: string): ResponseData {
+    if (!/^[1][3,4,5,7,8][0-9]{9}$/.test(phone)) {
+      return defineResponseData('手机号格式错误', Status.PARAM_ERROR)
+    }
+
     const code = this.createCode(phone)
 
     return defineResponseData('发送验证码成功', Status.SUCCESS, { code, phone })

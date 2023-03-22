@@ -5,3 +5,13 @@ export interface RegisterInfo {
   phone: string
   code: number
 }
+
+export interface UserInfo {
+  user: string
+  pwd: string
+  phone: string
+}
+
+export interface UserDBInfo extends UserInfo {
+  _id: unknown
+}
