@@ -1,5 +1,6 @@
 import { Connection } from 'mongoose'
 import { Injectable } from '@nestjs/common'
+import { hashPassword } from '@/utils/hashVerify'
 import { InjectConnection } from '@nestjs/mongoose'
 import { defineResponseData, ResponseData, Status } from '@/types'
 
@@ -84,7 +85,7 @@ export class RegisterService extends PhoneCodeModule {
     const hasRegistered = await this.findOne({ $or: [{ user }, { phone }] })
     if (hasRegistered) return false
 
-    return await this.insertOne({ user, phone, pwd })
+    return await this.insertOne({ user, phone, pwd: hashPassword(pwd) })
   }
 
   /**

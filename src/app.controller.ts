@@ -14,7 +14,7 @@ export class AppController {
   ) {}
 
   @UseGuards(LocalAuthGuard)
-  @Post('auth/login')
+  @Post('user/login')
   async login(@Request() { user }: { user: Omit<UserDBInfo, 'pwd'> }) {
     return this.authService.login(user)
   }
