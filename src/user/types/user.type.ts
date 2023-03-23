@@ -10,6 +10,7 @@ export interface UserInfo {
   user: string
   pwd: string
   phone: string
+  uid: string
 }
 
 export interface UserDBInfo extends UserInfo {

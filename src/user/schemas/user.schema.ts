@@ -10,6 +10,12 @@ export class User {
 
   @Prop()
   pwd: string
+
+  @Prop()
+  phone: string
+
+  @Prop()
+  uid: string
 }
 
 export const UserSchema = SchemaFactory.createForClass(User)

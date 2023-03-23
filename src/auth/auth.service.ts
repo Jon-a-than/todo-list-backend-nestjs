@@ -27,9 +27,7 @@ export class AuthService {
 
   async login(userInfo: Omit<UserDBInfo, 'pwd'>) {
     // JWT payload @Request.user = payload
-    const payload = { user: userInfo.user, phone: userInfo.phone }
-    return {
-      access_token: this.jwtService.sign(payload),
-    }
+    const payload = userInfo
+    return { access_token: this.jwtService.sign(payload) }
   }
 }
