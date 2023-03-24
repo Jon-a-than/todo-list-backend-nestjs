@@ -2,6 +2,8 @@ lockfileVersion: 5.4
 
 specifiers:
   '@alicloud/dysmsapi20170525': ^2.0.23
+  '@alicloud/openapi-client': ^0.4.5
+  '@alicloud/tea-util': ^1.4.5
   '@nestjs/cli': ^9.0.0
   '@nestjs/common': ^9.0.0
   '@nestjs/core': ^9.0.0
@@ -45,6 +47,8 @@ specifiers:
 
 dependencies:
   '@alicloud/dysmsapi20170525': registry.npmmirror.com/@alicloud/dysmsapi20170525/2.0.23
+  '@alicloud/openapi-client': registry.npmmirror.com/@alicloud/openapi-client/0.4.5
+  '@alicloud/tea-util': registry.npmmirror.com/@alicloud/tea-util/1.4.5
   '@nestjs/common': registry.npmmirror.com/@nestjs/common/9.3.10_mnr6j2del53muneqly5h4y27ai
   '@nestjs/core': registry.npmmirror.com/@nestjs/core/9.3.10_vtqjm4aysb2lmvp3b3whe7oj4e
   '@nestjs/jwt': registry.npmmirror.com/@nestjs/jwt/10.0.2_@nestjs+common@9.3.10
