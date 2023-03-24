@@ -23,6 +23,8 @@ export const enum Status {
   MONGO_INSERT_ERROR = 50001,
   /** MongoDB 用户/手机号已存在 */
   MONGO_USER_EXIST = 50002,
+  /** 短信发送失败 */
+  SMS_SEND_ERROR = 50003,
 }
 
 export interface ResponseData {

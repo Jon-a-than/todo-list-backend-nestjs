@@ -1,5 +1,6 @@
 import { Connection } from 'mongoose'
 import { Injectable } from '@nestjs/common'
+import { sendVerifyCode } from '@/utils/aliSMS'
 import { hashPassword } from '@/utils/hashVerify'
 import { InjectConnection } from '@nestjs/mongoose'
 import { defineResponseData, ResponseData, Status } from '@/types'
@@ -148,12 +149,14 @@ export class RegisterService extends PhoneCodeModule {
   }
 
   /** @TODO 短信发送验证码 */
-  sendCode(phone: string): ResponseData {
+  async sendCode(phone: string): Promise<ResponseData> {
     if (!/^[1][3,4,5,7,8][0-9]{9}$/.test(phone)) {
       return defineResponseData('手机号格式错误', Status.PARAM_ERROR)
     }
 
     const code = this.createCode(phone)
-    return defineResponseData('发送验证码成功', Status.SUCCESS, { code, phone })
+    return (await sendVerifyCode(code, phone))
+      ? defineResponseData('发送验证码成功', Status.SUCCESS, { code, phone })
+      : defineResponseData('发送验证码失败', Status.SMS_SEND_ERROR)
   }
 }

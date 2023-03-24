@@ -12,7 +12,7 @@ export class RegisterController {
   }
 
   @Get('/:phone')
-  sendCode(@Param('phone') phone: string) {
-    return this.registerService.sendCode(phone)
+  async sendCode(@Param('phone') phone: string) {
+    return await this.registerService.sendCode(phone)
   }
 }
