@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt'
 import { Injectable } from '@nestjs/common'
-import { UserService } from '@/user/user.service'
+import { UserDBService } from '@/user/userDB/userDB.service'
 import { validatePassword } from '@/utils/hashVerify'
 
 import type { UserDBInfo, UserInfo } from '@/user/types/user.type'
@@ -9,14 +9,16 @@ import type { UserDBInfo, UserInfo } from '@/user/types/user.type'
 export class AuthService {
   constructor(
     private jwtService: JwtService,
-    private userService: UserService,
+    private userDBService: UserDBService,
   ) {}
 
   async validateUser(
     user: string,
     pwd: string,
   ): Promise<Omit<UserInfo, 'pwd'> | null> {
-    const userInfo = await this.userService.findOne(user)
+    const userInfo = await this.userDBService.findOne({
+      $or: [{ user }, { phone: user }],
+    })
     if (userInfo && validatePassword(pwd, userInfo.pwd)) {
       // eslint-disable-next-line @typescript-eslint/no-unused-vars
       const { pwd, ...result } = userInfo

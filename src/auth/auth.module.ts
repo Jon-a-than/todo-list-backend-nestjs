@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { UserModule } from '@/user/user.module'
+import { UserDBModule } from '@/user/userDB/userDB.module'
 import { PassportModule } from '@nestjs/passport'
 import { LocalStrategy } from './strategys/local.strategy'
 import { JwtStrategy } from './strategys/jwt.strategy'
@@ -11,7 +11,7 @@ import { JWT_SECRET } from './constants/sectet'
   exports: [AuthService],
   providers: [AuthService, LocalStrategy, JwtStrategy],
   imports: [
-    UserModule,
+    UserDBModule,
     PassportModule,
     JwtModule.register({
       secret: JWT_SECRET,
