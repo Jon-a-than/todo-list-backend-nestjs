@@ -1,8 +1,7 @@
-import { Connection } from 'mongoose'
 import { Injectable } from '@nestjs/common'
 import { sendVerifyCode } from '@/utils/aliSMS'
 import { hashPassword } from '@/utils/hashVerify'
-import { InjectConnection } from '@nestjs/mongoose'
+import { UserDBService } from '../userDB/userDB.service'
 import { defineResponseData, ResponseData, Status } from '@/types'
 
 interface PhoneCode {
@@ -58,46 +57,41 @@ class PhoneCodeModule {
 
 @Injectable()
 export class RegisterService extends PhoneCodeModule {
-  constructor(@InjectConnection() private connection: Connection) {
+  constructor(protected readonly userDBservice: UserDBService) {
     super()
-  }
-
-  async findOne(filter: object): Promise<null | object> {
-    return await this.connection.collection('user').findOne(filter)
-  }
-
-  async insertOne(data: object): Promise<boolean> {
-    const { acknowledged } = await this.connection
-      .collection('user')
-      .insertOne(data)
-
-    return acknowledged
   }
 
   /** @info 生成用户uid */
   protected async createUid() {
     let uid = ~~(Math.random() * 900_000_000) + 100_000_000 + ''
-    while (await this.findOne({ uid })) {
+    while (await this.userDBservice.findOne({ uid })) {
       uid = ~~(Math.random() * 900_000_000) + 100_000_000 + ''
     }
     return uid
   }
 
   protected async hasRegistered(user: string, phone: string): Promise<Status> {
-    const hasUserRegistered = await this.findOne({ user })
+    const hasUserRegistered = await this.userDBservice.findOne({ user })
     if (hasUserRegistered) return Status.USER_EXIST
-    const hasPhoneRegistered = await this.findOne({ phone })
+    const hasPhoneRegistered = await this.userDBservice.findOne({ phone })
     if (hasPhoneRegistered) return Status.PHONE_EXIST
     return Status.SUCCESS
   }
 
   /** @info 数据库新增用户 */
   async addUser(user: string, phone: string, pwd: string): Promise<boolean> {
-    const hasRegistered = await this.findOne({ $or: [{ user }, { phone }] })
+    const hasRegistered = await this.userDBservice.findOne({
+      $or: [{ user }, { phone }],
+    })
     if (hasRegistered) return false
 
     const uid = await this.createUid()
-    return await this.insertOne({ user, phone, pwd: hashPassword(pwd), uid })
+    return await this.userDBservice.insertOne({
+      user,
+      phone,
+      pwd: hashPassword(pwd),
+      uid,
+    })
   }
 
   /** @info 注册 */
