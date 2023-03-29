@@ -3,7 +3,6 @@
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
-[circleci-url]: https://circleci.com/gh/nestjs/nest
 
 # TodoListBackend-NestJS
 
@@ -13,13 +12,19 @@
 
 ## 快速开始
 
-### 设置 JWT KEY
+### 设置 JWT KEY 与短信服务密钥
 
 **注意：**
 不要将密钥提交到版本控制中，因为它是敏感信息。
 
-```bash
-$ echo JWT_SECRET="<密钥>" > '.secret.env'
+使用阿里云短信服务，需要在 `.env` 文件中设置 `ACCESS_KEY_ID` 和 `ACCESS_KEY_SECRET` 两个环境变量。
+
+`.secret.env` 文件中的密钥将用于生成 JWT 令牌。
+
+```env
+JWT_SECRET="555555"
+ACCESS_KEY_ID="含短信服务权限的accessKeyId"
+ACCESS_KEY_SECRET="含短信服务权限的accessKeySecret"
 ```
 
 ### 启动项目
