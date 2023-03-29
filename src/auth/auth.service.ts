@@ -3,7 +3,7 @@ import { Injectable } from '@nestjs/common'
 import { UserDBService } from '@/user/userDB/userDB.service'
 import { validatePassword } from '@/utils/hashVerify'
 
-import type { UserDBInfo, UserInfo } from '@/user/types/user.type'
+import type { IUser, IUserDB } from '@/user/interfaces/user.interface'
 
 @Injectable()
 export class AuthService {
@@ -15,7 +15,7 @@ export class AuthService {
   async validateUser(
     user: string,
     pwd: string,
-  ): Promise<Omit<UserInfo, 'pwd'> | null> {
+  ): Promise<Omit<IUser, 'pwd'> | null> {
     const userInfo = await this.userDBService.findOne({
       $or: [{ user }, { phone: user }],
     })
@@ -27,7 +27,7 @@ export class AuthService {
     return null
   }
 
-  async login(userInfo: Omit<UserDBInfo, 'pwd'>) {
+  async login(userInfo: Omit<IUserDB, 'pwd'>) {
     // JWT payload @Request.user = payload
     const payload = userInfo
     return { access_token: this.jwtService.sign(payload) }

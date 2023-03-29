@@ -1,8 +1,8 @@
 import { Request, Controller, Get, Post, UseGuards } from '@nestjs/common'
 import { AuthService } from '@/auth/auth.service'
 import { LocalAuthGuard } from '@/auth/guards/local-auth.guard'
-import { UserDBInfo } from './types/user.type'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
+import type { IUserDB } from './interfaces/user.interface'
 
 @Controller('user')
 export class UserController {
@@ -10,13 +10,13 @@ export class UserController {
 
   @UseGuards(LocalAuthGuard)
   @Post('login')
-  async login(@Request() { user }: { user: Omit<UserDBInfo, 'pwd'> }) {
+  async login(@Request() { user }: { user: Omit<IUserDB, 'pwd'> }) {
     return this.authService.login(user)
   }
 
   @UseGuards(JwtAuthGuard)
   @Get('profile')
-  getProfile(@Request() { user }: { user: Omit<UserDBInfo, 'pwd' | '_id'> }) {
+  getProfile(@Request() { user }: { user: Omit<IUserDB, 'pwd' | '_id'> }) {
     return user
   }
 }

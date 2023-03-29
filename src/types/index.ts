@@ -17,6 +17,8 @@ export const enum Status {
   USER_EXIST = 40006,
   /** 手机号已存在 */
   PHONE_EXIST = 40007,
+  /** 短信发送过于频繁 */
+  SMS_SEND_MUCH = 40008,
   /** 服务器错误 */
   SERVER_ERROR = 50000,
   /** MongoDB 数据插入失败 */
