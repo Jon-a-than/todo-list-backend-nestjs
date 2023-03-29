@@ -1,6 +1,6 @@
 import { JwtService } from '@nestjs/jwt'
 import { Injectable } from '@nestjs/common'
-import { UserDBService } from '@/user/userDB/userDB.service'
+import { UserDBService } from '@/user/services/userDB/userDB.service'
 import { validatePassword } from '@/utils/hashVerify'
 
 import type { IUser, IUserDB } from '@/user/interfaces/user.interface'

@@ -2,7 +2,7 @@ import { Injectable } from '@nestjs/common'
 import { InjectConnection } from '@nestjs/mongoose'
 import { Connection } from 'mongoose'
 
-import type { IUserDB } from '../interfaces/user.interface'
+import type { IUserDB } from '../../interfaces/user.interface'
 
 @Injectable()
 export class UserDBService {

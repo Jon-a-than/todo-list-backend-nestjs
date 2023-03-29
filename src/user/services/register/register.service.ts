@@ -1,56 +1,43 @@
+import { redis } from '@/utils/redis'
 import { Injectable } from '@nestjs/common'
 import { sendVerifyCode } from '@/utils/aliSMS'
 import { hashPassword } from '@/utils/hashVerify'
 import { UserDBService } from '../userDB/userDB.service'
 import { defineResponseData, ResponseData, Status } from '@/types'
 
-interface PhoneCode {
-  createAt: number
-  phone: string
-  code: number
-  searched: number
-}
-
 /** @info 验证码生成与校验模块 */
 class PhoneCodeModule {
-  protected phoneCodeMap = new Map<string, PhoneCode>()
-
   /** @info 生成验证码 */
   protected createCode = (phone: string) => {
     const code = ~~(Math.random() * 900000) + 100000
-    this.phoneCodeMap.set(phone, {
-      createAt: new Date().getTime(),
-      searched: 0,
-      phone,
-      code,
-    })
+    redis.set(phone, `${code}$0$${new Date().getTime() + 60 * 1000}`, 'EX', 300)
 
     return code
   }
 
-  /** @info 校验验证码 */
-  protected checkPhoneCode = (phone: string, code: number): Status => {
-    if (!this.phoneCodeMap.has(phone)) return Status.CODE_NULL
+  /**
+   * @info 校验验证码
+   * @param phone 手机号
+   * @param code 验证码
+   * @description 5分钟内有效(由redis控制，超时自动删除键值对)，最多验证3次
+   */
+  protected checkPhoneCode = async (
+    phone: string,
+    code: number,
+  ): Promise<Status> => {
+    const verifyCodeString = await redis.get(phone)
+    if (!verifyCodeString) return Status.CODE_NULL
+    const [verifyCode, count, endTime] = verifyCodeString.split('$')
+    const destroyTime = await redis.ttl(phone)
+    redis.set(
+      phone,
+      `${verifyCode}$${+count + 1}$${endTime}`,
+      'EX',
+      destroyTime,
+    )
 
-    const phoneCodeInfo = this.phoneCodeMap.get(phone)
-    if (phoneCodeInfo.searched < 3) {
-      this.phoneCodeMap.set(phone, {
-        code: phoneCodeInfo.code,
-        phone: phoneCodeInfo.phone,
-        createAt: phoneCodeInfo.createAt,
-        searched: phoneCodeInfo.searched + 1,
-      })
-    } else {
-      this.phoneCodeMap.delete(phone)
-      return Status.CODE_MATCH_MUCH
-    }
-
-    if (new Date().getTime() - phoneCodeInfo.createAt > 5 * 60000) {
-      this.phoneCodeMap.delete(phone)
-      return Status.CODE_TIMEOUT
-    } else if (phoneCodeInfo.code !== code) return Status.CODE_ERROR
-
-    this.phoneCodeMap.delete(phone)
+    if (+count >= 3) return Status.CODE_MATCH_MUCH
+    if (+verifyCode !== code) return Status.CODE_ERROR
     return Status.SUCCESS
   }
 }
@@ -123,14 +110,12 @@ export class RegisterService extends PhoneCodeModule {
       )
     }
 
-    const checkRes = this.checkPhoneCode(phone, code)
+    const checkRes = await this.checkPhoneCode(phone, code)
     switch (checkRes) {
       case Status.CODE_NULL:
         return defineResponseData('未发送验证码或已过期', Status.CODE_NULL)
       case Status.CODE_MATCH_MUCH:
         return defineResponseData('验证码错误次数过多', Status.CODE_MATCH_MUCH)
-      case Status.CODE_TIMEOUT:
-        return defineResponseData('验证码已超时', Status.CODE_TIMEOUT)
       case Status.CODE_ERROR:
         return defineResponseData('验证码错误', Status.CODE_ERROR)
       case Status.SUCCESS:
@@ -142,10 +127,21 @@ export class RegisterService extends PhoneCodeModule {
     }
   }
 
-  /** @TODO 短信发送验证码 */
+  /**
+   * @info 发送验证码
+   * @param phone 手机号
+   */
   async sendCode(phone: string): Promise<ResponseData> {
     if (!/^[1][3,4,5,7,8][0-9]{9}$/.test(phone)) {
       return defineResponseData('手机号格式错误', Status.PARAM_ERROR)
+    }
+
+    /** @example "123456$2$5641894894" */
+    const strings = await redis.get(phone)
+    if (strings) {
+      const [_verifyCode, _count, endTime] = strings.split('$')
+      if (new Date().getTime() < +endTime)
+        return defineResponseData('发送过于频繁', Status.SMS_SEND_MUCH)
     }
 
     const code = this.createCode(phone)

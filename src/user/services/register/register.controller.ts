@@ -1,6 +1,6 @@
 import { Body, Controller, Post, Get, Param } from '@nestjs/common'
 import { RegisterService } from './register.service'
-import type { IRegisterDTO } from '../interfaces/user.interface'
+import type { IRegisterDTO } from '../../interfaces/user.interface'
 
 @Controller('user/register')
 export class RegisterController {
