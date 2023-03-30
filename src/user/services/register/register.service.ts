@@ -84,24 +84,10 @@ export class RegisterService extends PhoneCodeModule {
   /** @info 注册 */
   async register(
     user: string,
-    pwd1: string,
-    pwd2: string,
+    pwd: string,
     phone: string,
     code: number,
   ): Promise<ResponseData> {
-    if (!(user && pwd1 && pwd2 && phone && code))
-      return defineResponseData('参数不完整', Status.PARAM_LESS)
-    if (pwd1 !== pwd2) {
-      return defineResponseData('密码不一致', Status.PARAM_ERROR)
-    } else if (user.length < 3 || user.length > 16) {
-      return defineResponseData('用户名长度不符合要求', Status.PARAM_ERROR)
-    } else if (
-      pwd1.length + pwd2.length < 12 ||
-      pwd1.length + pwd2.length > 32
-    ) {
-      return defineResponseData('密码长度不符合要求', Status.PARAM_ERROR)
-    }
-
     const hasRegistered = await this.hasRegistered(user, phone)
     if (hasRegistered !== Status.SUCCESS) {
       return defineResponseData(
@@ -119,8 +105,8 @@ export class RegisterService extends PhoneCodeModule {
       case Status.CODE_ERROR:
         return defineResponseData('验证码错误', Status.CODE_ERROR)
       case Status.SUCCESS:
-        return (await this.addUser(user, phone, pwd1))
-          ? defineResponseData('注册成功', Status.SUCCESS, { user, pwd1 })
+        return (await this.addUser(user, phone, pwd))
+          ? defineResponseData('注册成功', Status.SUCCESS, { user, pwd })
           : defineResponseData('数据库错误', Status.MONGO_INSERT_ERROR)
       default:
         return defineResponseData('未知错误', Status.SERVER_ERROR)
@@ -132,10 +118,6 @@ export class RegisterService extends PhoneCodeModule {
    * @param phone 手机号
    */
   async sendCode(phone: string): Promise<ResponseData> {
-    if (!/^[1][3,4,5,7,8][0-9]{9}$/.test(phone)) {
-      return defineResponseData('手机号格式错误', Status.PARAM_ERROR)
-    }
-
     /** @example "123456$2$5641894894" */
     const strings = await redis.get(phone)
     if (strings) {
