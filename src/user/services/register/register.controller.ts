@@ -7,19 +7,19 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { RegisterService } from './register.service'
-import { CreatePhoneDto, CreateRegisterDto } from '@/user/dtos/register.dto'
+import { PhoneDto, RegisterInfoDto } from '@/user/dtos/register.dto'
 
 @Controller('user/register')
 export class RegisterController {
   constructor(private readonly registerService: RegisterService) {}
 
   @Post()
-  async register(@Body() { user, pwd1, phone, code }: CreateRegisterDto) {
+  async register(@Body() { user, pwd1, phone, code }: RegisterInfoDto) {
     return await this.registerService.register(user, pwd1, phone, code)
   }
 
   @Get('/:phone')
-  async sendCode(@Param(new ValidationPipe()) { phone }: CreatePhoneDto) {
+  async sendCode(@Param(new ValidationPipe()) { phone }: PhoneDto) {
     return await this.registerService.sendCode(phone)
   }
 }
