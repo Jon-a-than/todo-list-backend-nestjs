@@ -20,15 +20,13 @@ export class AuthService {
       $or: [{ user }, { phone: user }],
     })
     if (userInfo && validatePassword(pwd, userInfo.pwd)) {
-      // eslint-disable-next-line @typescript-eslint/no-unused-vars
-      const { pwd, ...result } = userInfo
+      const { pwd: _pwd, ...result } = userInfo
       return result
     }
     return null
   }
 
-  async login(userInfo: Omit<IUserDB, 'pwd'>) {
-    // JWT payload @Request.user = payload
+  login(userInfo: Omit<IUserDB, 'pwd'>) {
     const payload = userInfo
     return { access_token: this.jwtService.sign(payload) }
   }
