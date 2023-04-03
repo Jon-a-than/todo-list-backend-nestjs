@@ -94,7 +94,6 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
         return null
       case userUUID === uuid || !userUUID:
         const uuidVerifyCode = (await redis.get(uuid))?.slice(0, 4) ?? null
-        console.log(uuidVerifyCode, verifyCode)
         if (verifyCode === uuidVerifyCode) return null
     }
 
