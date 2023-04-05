@@ -1,17 +1,12 @@
 import { HttpException, Injectable } from '@nestjs/common'
 import { TodoDBService } from '@/databases/todo/todoDB.service'
-import type {
-  CreateList,
-  DeleteList,
-  GetList,
-} from '@/todo/interfaces/todo.interface'
-import type { InitCreateListInfo } from '@/todo/interfaces/todo.interface'
+import type * as ListCURD from '@/todo/interfaces/todo.interface'
 
 @Injectable()
 export class TodoService {
   constructor(protected readonly todoDBService: TodoDBService) {}
 
-  getList: GetList = async (limit, uid, type, distribution) => {
+  getList: ListCURD.GetList = async (limit, uid, type, distribution) => {
     return {
       list: await this.todoDBService.limitedFind(
         limit,
@@ -22,19 +17,25 @@ export class TodoService {
     }
   }
 
-  createList: CreateList = async (todoListInfo) => {
+  createList: ListCURD.CreateList = async (todoListInfo) => {
+    const createRes = !!(await this.todoDBService.createList(todoListInfo))
     return {
-      message: (await this.todoDBService.createList(todoListInfo))
-        ? '创建成功'
-        : '创建失败',
+      message: createRes ? '创建成功' : '创建失败',
     }
   }
 
-  updateList() {
-    return 'updateList'
+  updateList: ListCURD.UpdateList = async (uid, listPayload) => {
+    const preListInfo = await this.todoDBService.findOneById(listPayload.id)
+    if (!preListInfo) return new HttpException('id查询失败', 400)
+    if (preListInfo.createdBy && preListInfo.createdBy !== uid)
+      return new HttpException('权限不足', 401)
+
+    const { id, ...omittedList } = listPayload
+    await this.todoDBService.findOneAndUpdate(id, omittedList)
+    return { message: '更新成功' }
   }
 
-  deleteList: DeleteList = async (id, uid) => {
+  deleteList: ListCURD.DeleteList = async (id, uid) => {
     const createdBy = (await this.todoDBService.findOneById(id))?.createdBy
     if (createdBy && createdBy !== uid)
       return new HttpException('权限不足', 401)
@@ -43,7 +44,7 @@ export class TodoService {
     return { message: '删除成功' }
   }
 
-  initCreateListInfo: InitCreateListInfo = (reqData, { uid }) => {
+  initCreateListInfo: ListCURD.InitCreateListInfo = (reqData, { uid }) => {
     return {
       createdBy: uid,
       important: false,

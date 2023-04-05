@@ -20,24 +20,20 @@ export class TodoDBService {
         .find({ createdBy: uid, type, distribution })
         .limit(limit)
         .exec()
-    ).map((item) => {
-      return {
-        id: item.id,
-        createdBy: item.createdBy,
-        title: item.title,
-        finished: item.finished,
-        type: item.type,
-        important: item.important,
-        distribution: item.distribution,
-        endTime: item?.endTime,
-        description: item?.description,
-        createdAt: item.createdAt,
-      }
-    })
+    ).map((item) => cleanListItem(item))
   }
 
   async findOneById(id: Types.ObjectId) {
-    return await this.todoModel.findById(id).exec()
+    return cleanListItem(await this.todoModel.findById(id).exec())
+  }
+
+  async findOneAndUpdate(id: Types.ObjectId, payload) {
+    return await this.todoModel
+      .findOneAndUpdate(
+        { _id: id },
+        { ...payload, updatedAt: new Date().getTime() },
+      )
+      .exec()
   }
 
   async findByIdAndDelete(id: Types.ObjectId) {
@@ -47,5 +43,20 @@ export class TodoDBService {
   async createList(listInfo: ITodoList) {
     const newList = new this.todoModel(listInfo)
     return await newList.save()
+  }
+}
+
+function cleanListItem(item: any) {
+  return {
+    id: item.id,
+    createdBy: item.createdBy,
+    title: item.title,
+    finished: item.finished,
+    type: item.type,
+    important: item.important,
+    distribution: item.distribution,
+    endTime: item?.endTime,
+    description: item?.description,
+    createdAt: item.createdAt,
   }
 }

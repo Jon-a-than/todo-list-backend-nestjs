@@ -39,6 +39,11 @@ interface ListInfo extends ReqData {
   distribution: string
 }
 
+type UpdateList = (
+  uid: string,
+  payload: Partial<ListInfo> & { id: Types.ObjectId },
+) => Promise<{ message: string }>
+
 type InitCreateListInfo = (
   reqData: ReqData,
   user: Omit<IUserDB, 'pwd' | '_id'>,
@@ -49,4 +54,4 @@ type DeleteList = (
   uid: string,
 ) => Promise<{ message: string } | HttpException>
 
-export type { InitCreateListInfo, GetList, CreateList, DeleteList }
+export type { InitCreateListInfo, GetList, CreateList, DeleteList, UpdateList }
