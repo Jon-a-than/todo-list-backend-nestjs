@@ -1,14 +1,25 @@
 import { HttpException, Injectable } from '@nestjs/common'
 import { TodoDBService } from '@/databases/todo/todoDB.service'
-import type { CreateList, DeleteList } from '@/todo/interfaces/todo.interface'
+import type {
+  CreateList,
+  DeleteList,
+  GetList,
+} from '@/todo/interfaces/todo.interface'
 import type { InitCreateListInfo } from '@/todo/interfaces/todo.interface'
 
 @Injectable()
 export class TodoService {
   constructor(protected readonly todoDBService: TodoDBService) {}
 
-  getList() {
-    return 'getList'
+  getList: GetList = async (limit, uid, type, distribution) => {
+    return {
+      list: await this.todoDBService.limitedFind(
+        limit,
+        uid,
+        type,
+        distribution,
+      ),
+    }
   }
 
   createList: CreateList = async (todoListInfo) => {
@@ -24,7 +35,7 @@ export class TodoService {
   }
 
   deleteList: DeleteList = async (id, uid) => {
-    const { createdBy } = await this.todoDBService.findOneById(id)
+    const createdBy = (await this.todoDBService.findOneById(id))?.createdBy
     if (createdBy && createdBy !== uid)
       return new HttpException('权限不足', 401)
 

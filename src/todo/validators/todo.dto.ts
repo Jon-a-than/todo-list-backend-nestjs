@@ -13,6 +13,23 @@ import {
 } from 'class-validator'
 import { Types } from 'mongoose'
 
+export class GetListDto {
+  @IsNotEmpty({ message: 'limit参数为空' })
+  @IsNumberString({}, { message: 'limit类型错误' })
+  @MaxLength(2, { message: '超出最大查询数' })
+  limit: string
+
+  @IsNotEmpty({ message: 'type参数为空' })
+  @IsNumberString({}, { message: 'type参数错误' })
+  type: string
+
+  @IsNotEmpty({ message: 'distribution参数为空' })
+  @IsOptional()
+  @IsNumberString({}, { message: 'distribution应为数字' })
+  @Length(9, 9, { message: 'distribution参数错误' })
+  distribution: string
+}
+
 export class CreateTodoDto {
   @IsNotEmpty({ message: 'title为空' })
   @Length(1, 50, { message: 'title长度错误' })

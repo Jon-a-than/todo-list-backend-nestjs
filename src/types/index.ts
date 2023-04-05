@@ -1,3 +1,5 @@
+import { IUserDB } from '@/user/interfaces/user.interface'
+
 export const enum Status {
   /** 成功 */
   SUCCESS = 20000,
@@ -45,4 +47,8 @@ export const defineResponseData = (
     data,
     status,
   }
+}
+
+export interface JwtRequestPayload {
+  user: Omit<IUserDB, 'pwd' | '_id'>
 }
