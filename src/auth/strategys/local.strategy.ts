@@ -1,4 +1,4 @@
-import { Strategy, VerifyFunctionWithRequest } from 'passport-local'
+import { Strategy } from 'passport-local'
 import { PassportStrategy } from '@nestjs/passport'
 import {
   HttpException,
@@ -6,20 +6,20 @@ import {
   UnauthorizedException,
 } from '@nestjs/common'
 import { AuthService } from '../auth.service'
-import { IUser } from '@/user/interfaces/user.interface'
 import { redis } from '@/utils/redis'
 import { getSvgCaptcha } from '@/utils/svgCaptcha'
 import { getUuid } from '@/utils/uuid'
 
+import type {
+  ValidateFunction,
+  VerifyFunctionWithRequest,
+} from '../interfaces/local.strategy.interface'
+
 const verifyFunctionWithRequest: VerifyFunctionWithRequest = async function (
-  this: LocalStrategy,
   { body },
-  user: string,
-  pwd: string,
-  done: (
-    error: any,
-    user?: Omit<IUser, 'pwd'> | { verifyCodeSvg: string },
-  ) => void,
+  user,
+  pwd,
+  done,
 ) {
   const { verifyCode, uuid } = body
   const { error, userInfo } = await this.validate({
@@ -44,20 +44,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     )
   }
 
-  async validate({
-    user,
-    pwd,
-    verifyCode,
-    uuid,
-  }: {
-    user: string
-    pwd: string
-    verifyCode?: string
-    uuid?: string
-  }): Promise<{
-    error?: unknown
-    userInfo?: Omit<IUser, 'pwd'>
-  }> {
+  validate: ValidateFunction = async ({ user, pwd, verifyCode, uuid }) => {
     const verifyError = await this.validateVerifyCode(user, uuid, verifyCode)
     if (verifyError) return { error: verifyError }
 
@@ -110,7 +97,7 @@ export class LocalStrategy extends PassportStrategy(Strategy) {
     )
     /**
      * uuid !== userUUID ================> newUUID = userUUID ?? uuid 生成验证码
-     * veifycode !== uuidVerifyCode =====> newUUID = userUUID ?? uuid 生成验证码
+     * verifyCode !== uuidVerifyCode =====> newUUID = userUUID ?? uuid 生成验证码
      * ！uuid && userUUID ===============> newUUID = userUUID ?? uuid 生成验证码
      */
   }

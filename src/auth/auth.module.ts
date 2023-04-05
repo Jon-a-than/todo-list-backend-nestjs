@@ -1,6 +1,6 @@
 import { Module } from '@nestjs/common'
 import { AuthService } from './auth.service'
-import { UserDBModule } from '@/user/services/userDB/userDB.module'
+import { UserDBModule } from '@/databases/user/userDB.module'
 import { PassportModule } from '@nestjs/passport'
 import { LocalStrategy } from './strategys/local.strategy'
 import { JwtStrategy } from './strategys/jwt.strategy'
