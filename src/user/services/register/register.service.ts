@@ -2,8 +2,10 @@ import { redis } from '@/utils/redis'
 import { Injectable } from '@nestjs/common'
 import { sendVerifyCode } from '@/utils/aliSMS'
 import { hashPassword } from '@/utils/hashVerify'
-import { UserDBService } from '../userDB/userDB.service'
+import { UserDBService } from '@/databases/user/userDB.service'
 import { defineResponseData, ResponseData, Status } from '@/types'
+
+import type { Register } from '@/user/interfaces/register.interface'
 
 /** @info 验证码生成与校验模块 */
 class PhoneCodeModule {
@@ -44,36 +46,36 @@ class PhoneCodeModule {
 
 @Injectable()
 export class RegisterService extends PhoneCodeModule {
-  constructor(protected readonly userDBservice: UserDBService) {
+  constructor(protected readonly userDBService: UserDBService) {
     super()
   }
 
   /** @info 生成用户uid */
   protected async createUid() {
     let uid = ~~(Math.random() * 900_000_000) + 100_000_000 + ''
-    while (await this.userDBservice.findOne({ uid })) {
+    while (await this.userDBService.findOne({ uid })) {
       uid = ~~(Math.random() * 900_000_000) + 100_000_000 + ''
     }
     return uid
   }
 
   protected async hasRegistered(user: string, phone: string): Promise<Status> {
-    const hasUserRegistered = await this.userDBservice.findOne({ user })
+    const hasUserRegistered = await this.userDBService.findOne({ user })
     if (hasUserRegistered) return Status.USER_EXIST
-    const hasPhoneRegistered = await this.userDBservice.findOne({ phone })
+    const hasPhoneRegistered = await this.userDBService.findOne({ phone })
     if (hasPhoneRegistered) return Status.PHONE_EXIST
     return Status.SUCCESS
   }
 
   /** @info 数据库新增用户 */
   async addUser(user: string, phone: string, pwd: string): Promise<boolean> {
-    const hasRegistered = await this.userDBservice.findOne({
+    const hasRegistered = await this.userDBService.findOne({
       $or: [{ user }, { phone }],
     })
     if (hasRegistered) return false
 
     const uid = await this.createUid()
-    return await this.userDBservice.insertOne({
+    return await this.userDBService.insertOne({
       user,
       phone,
       pwd: hashPassword(pwd),
@@ -82,12 +84,7 @@ export class RegisterService extends PhoneCodeModule {
   }
 
   /** @info 注册 */
-  async register(
-    user: string,
-    pwd: string,
-    phone: string,
-    code: number,
-  ): Promise<ResponseData> {
+  register: Register = async (user, pwd, phone, code) => {
     const hasRegistered = await this.hasRegistered(user, phone)
     if (hasRegistered !== Status.SUCCESS) {
       return defineResponseData(
