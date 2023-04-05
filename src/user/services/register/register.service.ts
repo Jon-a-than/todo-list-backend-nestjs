@@ -3,14 +3,14 @@ import { Injectable } from '@nestjs/common'
 import { sendVerifyCode } from '@/utils/aliSMS'
 import { hashPassword } from '@/utils/hashVerify'
 import { UserDBService } from '@/databases/user/userDB.service'
-import { defineResponseData, ResponseData, Status } from '@/types'
+import { defineResponseData, Status } from '@/types'
 
-import type { Register } from '@/user/interfaces/register.interface'
+import type * as IRegister from '@/user/interfaces/register.interface'
 
 /** @info 验证码生成与校验模块 */
 class PhoneCodeModule {
   /** @info 生成验证码 */
-  protected createCode = (phone: string) => {
+  createCode: IRegister.CreateCode = (phone) => {
     const code = ~~(Math.random() * 900000) + 100000
     redis.set(phone, `${code}$0$${new Date().getTime() + 60 * 1000}`, 'EX', 300)
 
@@ -23,10 +23,7 @@ class PhoneCodeModule {
    * @param code 验证码
    * @description 5分钟内有效(由redis控制，超时自动删除键值对)，最多验证3次
    */
-  protected checkPhoneCode = async (
-    phone: string,
-    code: number,
-  ): Promise<Status> => {
+  checkPhoneCode: IRegister.CheckPhoneCode = async (phone, code) => {
     const verifyCodeString = await redis.get(phone)
     if (!verifyCodeString) return Status.CODE_NULL
     const [verifyCode, count, endTime] = verifyCodeString.split('$')
@@ -59,7 +56,7 @@ export class RegisterService extends PhoneCodeModule {
     return uid
   }
 
-  protected async hasRegistered(user: string, phone: string): Promise<Status> {
+  hasRegistered: IRegister.HasRegistered = async (user, phone) => {
     const hasUserRegistered = await this.userDBService.findOne({ user })
     if (hasUserRegistered) return Status.USER_EXIST
     const hasPhoneRegistered = await this.userDBService.findOne({ phone })
@@ -68,7 +65,7 @@ export class RegisterService extends PhoneCodeModule {
   }
 
   /** @info 数据库新增用户 */
-  async addUser(user: string, phone: string, pwd: string): Promise<boolean> {
+  addUser: IRegister.AddUser = async (user, phone, pwd) => {
     const hasRegistered = await this.userDBService.findOne({
       $or: [{ user }, { phone }],
     })
@@ -84,7 +81,7 @@ export class RegisterService extends PhoneCodeModule {
   }
 
   /** @info 注册 */
-  register: Register = async (user, pwd, phone, code) => {
+  register: IRegister.Register = async (user, pwd, phone, code) => {
     const hasRegistered = await this.hasRegistered(user, phone)
     if (hasRegistered !== Status.SUCCESS) {
       return defineResponseData(
@@ -114,7 +111,7 @@ export class RegisterService extends PhoneCodeModule {
    * @info 发送验证码
    * @param phone 手机号
    */
-  async sendCode(phone: string): Promise<ResponseData> {
+  sendCode: IRegister.SendCode = async (phone) => {
     /** @example "123456$2$5641894894" */
     const strings = await redis.get(phone)
     if (strings) {
