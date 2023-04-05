@@ -17,4 +17,5 @@ describe('RegisterController', () => {
   it('should be defined', () => {
     expect(controller).toBeDefined()
   })
+  // describe('user/register', () => {})
 })
