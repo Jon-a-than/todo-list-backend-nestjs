@@ -9,7 +9,9 @@ import {
   IsInt,
   IsNumber,
   Max,
+  IsMongoId,
 } from 'class-validator'
+import { Types } from 'mongoose'
 
 export class CreateTodoDto {
   @IsNotEmpty({ message: 'title为空' })
@@ -41,4 +43,9 @@ export class CreateTodoDto {
   @Min(100_000_000_000, { message: 'endTime过小' })
   @Max(300_000_000_000, { message: 'endTime过大' })
   endTime?: number
+}
+
+export class DeleteDto {
+  @IsMongoId({ message: 'id 参数错误' })
+  id: Types.ObjectId
 }

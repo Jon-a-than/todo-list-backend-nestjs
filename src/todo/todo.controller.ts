@@ -1,16 +1,18 @@
 import { TodoService } from './todo.service'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
 import {
-  Body,
-  Controller,
-  Delete,
   Get,
-  Patch,
+  Body,
   Post,
-  UseGuards,
+  Patch,
+  Param,
+  Delete,
   Request,
+  UseGuards,
+  Controller,
+  ValidationPipe,
 } from '@nestjs/common'
-import { CreateTodoDto } from './validators/todo.dto'
+import { CreateTodoDto, DeleteDto } from './validators/todo.dto'
 
 import type { JwtRequestPayload } from '@/types'
 
@@ -41,8 +43,11 @@ export class TodoController {
   }
 
   @UseGuards(JwtAuthGuard)
-  @Delete('/:uuid')
-  deleteList() {
-    return this.todoService.deleteList()
+  @Delete('/:id')
+  async deleteList(
+    @Param(new ValidationPipe()) { id }: DeleteDto,
+    @Request() { user }: JwtRequestPayload,
+  ) {
+    return await this.todoService.deleteList(id, user.uid)
   }
 }

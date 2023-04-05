@@ -14,7 +14,6 @@ export interface ITodoList {
   endTime?: number
   createdAt: number
   updatedAt?: number
-  deletedAt?: number
 }
 
 @Schema()
@@ -39,8 +38,7 @@ export class TodoList implements ITodoList {
   createdAt: number
   @Prop({ required: false })
   updatedAt: number
-  @Prop({ required: false })
-  deletedAt: number
 }
 
-export const TodoListSchema = SchemaFactory.createForClass(TodoList)
+const TodoListSchema = SchemaFactory.createForClass(TodoList)
+export { TodoListSchema }
