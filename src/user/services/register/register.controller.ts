@@ -7,7 +7,7 @@ import {
   ValidationPipe,
 } from '@nestjs/common'
 import { RegisterService } from './register.service'
-import { PhoneDto, RegisterInfoDto } from '@/user/dtos/register.dto'
+import { PhoneDto, RegisterInfoDto } from '@/user/validators/register.dto'
 
 @Controller('user/register')
 export class RegisterController {
