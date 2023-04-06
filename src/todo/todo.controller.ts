@@ -29,10 +29,10 @@ export class TodoController {
   @UseGuards(JwtAuthGuard)
   @Get()
   async getList(
-    @Query(new ValidationPipe()) { limit, type, distribution }: GetListDto,
+    @Query(new ValidationPipe()) { limit, pageId }: GetListDto,
     @Request() { user }: JwtRequestPayload,
   ) {
-    return await this.todoService.getList(+limit, user.uid, +type, distribution)
+    return await this.todoService.getList(+limit, user.uid, +pageId)
   }
 
   @UseGuards(JwtAuthGuard)

@@ -9,16 +9,12 @@ import type { Types } from 'mongoose'
 export class TodoDBService {
   constructor(@InjectModel(TodoList.name) private todoModel: Model<TodoList>) {}
 
-  async limitedFind(
-    limit: number,
-    uid: string,
-    type: number,
-    distribution: string,
-  ) {
+  async limitedFind(limit: number, uid: string, pageId: number) {
     return (
       await this.todoModel
-        .find({ createdBy: uid, type, distribution })
+        .find(typeToQuery(pageId, uid))
         .limit(limit)
+        .lean()
         .exec()
     ).map((item) => cleanListItem(item))
   }
@@ -47,16 +43,34 @@ export class TodoDBService {
 }
 
 function cleanListItem(item: any) {
+  const { _id, __v, ...omittedItem } = item
   return {
-    id: item.id,
-    createdBy: item.createdBy,
-    title: item.title,
-    finished: item.finished,
-    type: item.type,
-    important: item.important,
-    distribution: item.distribution,
-    endTime: item?.endTime,
-    description: item?.description,
-    createdAt: item.createdAt,
+    id: _id,
+    ...omittedItem,
+  }
+}
+
+const enum PageId {
+  'home',
+  'main',
+  'plan',
+  'distribution',
+  'created',
+  'task',
+}
+function typeToQuery(pageId: number, uid: string) {
+  switch (pageId) {
+    case PageId.main:
+      return { createdBy: uid, important: true }
+    case PageId.plan:
+      return { createdBy: uid }
+    case PageId.distribution:
+      return { createdBy: { $ne: uid }, distribution: uid }
+    case PageId.created:
+      return { createdBy: uid, distribution: { $ne: uid } }
+    case PageId.task:
+      return { createdBy: uid, type: { $lte: 10 } }
+    default:
+      return { createdBy: uid, type: pageId }
   }
 }

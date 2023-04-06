@@ -6,14 +6,9 @@ import type * as ListCURD from '@/todo/interfaces/todo.interface'
 export class TodoService {
   constructor(protected readonly todoDBService: TodoDBService) {}
 
-  getList: ListCURD.GetList = async (limit, uid, type, distribution) => {
+  getList: ListCURD.GetList = async (limit, uid, pageId) => {
     return {
-      list: await this.todoDBService.limitedFind(
-        limit,
-        uid,
-        type,
-        distribution,
-      ),
+      list: await this.todoDBService.limitedFind(limit, uid, pageId),
     }
   }
 
@@ -44,8 +39,12 @@ export class TodoService {
     return { message: '删除成功' }
   }
 
-  initCreateListInfo: ListCURD.InitCreateListInfo = (reqData, { uid }) => {
+  initCreateListInfo: ListCURD.InitCreateListInfo = (
+    reqData,
+    { uid, user },
+  ) => {
     return {
+      owner: user,
       createdBy: uid,
       important: false,
       finished: false,
