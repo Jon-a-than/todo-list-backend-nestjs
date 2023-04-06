@@ -5,6 +5,7 @@ export type TodoListDocument = HydratedDocument<TodoList>
 
 export interface ITodoList {
   createdBy: string
+  owner: string
   title: string
   finished: boolean
   type: number
@@ -20,6 +21,8 @@ export interface ITodoList {
 export class TodoList implements ITodoList {
   @Prop({ required: true })
   createdBy: string
+  @Prop({ required: true })
+  owner: string
   @Prop({ required: true })
   title: string
   @Prop({ required: true })

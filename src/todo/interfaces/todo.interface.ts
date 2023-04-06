@@ -5,11 +5,11 @@ import { HttpException } from '@nestjs/common'
 type GetList = (
   limit: number,
   uid: string,
-  type: number,
-  distribution: string,
+  pageId: number,
 ) => Promise<{
   list: {
     id: string
+    owner: string
     createdBy: string
     title: string
     finished: boolean
@@ -32,6 +32,7 @@ interface ReqData {
 }
 
 interface ListInfo extends ReqData {
+  owner: string
   createdAt: number
   createdBy: string
   important: boolean
@@ -41,14 +42,16 @@ interface ListInfo extends ReqData {
 
 type UpdateList = (
   uid: string,
-  payload: Partial<ListInfo> & { id: Types.ObjectId },
+  payload: Partial<Omit<ListInfo, 'owner'>> & { id: Types.ObjectId },
 ) => Promise<{ message: string }>
 
 type InitCreateListInfo = (
   reqData: ReqData,
   user: Omit<IUserDB, 'pwd' | '_id'>,
 ) => ListInfo
+
 type CreateList = (listInfo: ListInfo) => unknown
+
 type DeleteList = (
   id: Types.ObjectId,
   uid: string,
