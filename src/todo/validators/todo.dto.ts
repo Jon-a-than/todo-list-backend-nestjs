@@ -51,8 +51,8 @@ export class CreateTodoDto {
     { allowInfinity: false, allowNaN: false },
     { message: 'endTime应为数字' },
   )
-  @Min(100_000_000_000, { message: 'endTime过小' })
-  @Max(300_000_000_000, { message: 'endTime过大' })
+  @Min(1_600_000_000_000, { message: 'endTime过小' })
+  @Max(4_000_000_000_000, { message: 'endTime过大' })
   endTime?: number
 }
 
@@ -89,7 +89,7 @@ export class UpdateTodoDto extends ListIdDto {
     { allowInfinity: false, allowNaN: false },
     { message: 'endTime应为数字' },
   )
-  @Min(100_000_000_000, { message: 'endTime过小' })
-  @Max(300_000_000_000, { message: 'endTime过大' })
+  @Min(1_000_000_000_000, { message: 'endTime过小' })
+  @Max(4_000_000_000_000, { message: 'endTime过大' })
   endTime?: number
 }

@@ -36,6 +36,12 @@ export class TodoController {
   }
 
   @UseGuards(JwtAuthGuard)
+  @Get('/:id')
+  async getListById(@Param(new ValidationPipe()) { id }: ListIdDto) {
+    return await this.todoService.getListById(id)
+  }
+
+  @UseGuards(JwtAuthGuard)
   @Post()
   async createList(
     @Request() { user }: JwtRequestPayload,

@@ -12,6 +12,13 @@ export class TodoService {
     }
   }
 
+  getListById: ListCURD.GetListById = async (id) => {
+    return (
+      (await this.todoDBService.findOneById(id)) ??
+      new HttpException('id查询失败', 400)
+    )
+  }
+
   createList: ListCURD.CreateList = async (todoListInfo) => {
     const createRes = !!(await this.todoDBService.createList(todoListInfo))
     return {

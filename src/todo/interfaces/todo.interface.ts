@@ -2,26 +2,6 @@ import { IUserDB } from '@/user/interfaces/user.interface'
 import { Types } from 'mongoose'
 import { HttpException } from '@nestjs/common'
 
-type GetList = (
-  limit: number,
-  uid: string,
-  pageId: number,
-) => Promise<{
-  list: {
-    id: string
-    owner: string
-    createdBy: string
-    title: string
-    finished: boolean
-    type: number
-    important: boolean
-    distribution: string
-    endTime?: number
-    description?: string
-    createdAt: number
-  }[]
-}>
-
 interface ReqData {
   title: string
   type: number
@@ -40,6 +20,16 @@ interface ListInfo extends ReqData {
   distribution: string
 }
 
+type ListInfoDB = ListInfo & { id: string }
+
+type GetList = (
+  limit: number,
+  uid: string,
+  pageId: number,
+) => Promise<{ list: ListInfoDB[] }>
+
+type GetListById = (id: Types.ObjectId) => Promise<ListInfoDB | Error>
+
 type UpdateList = (
   uid: string,
   payload: Partial<Omit<ListInfo, 'owner'>> & { id: Types.ObjectId },
@@ -57,4 +47,12 @@ type DeleteList = (
   uid: string,
 ) => Promise<{ message: string } | HttpException>
 
-export type { InitCreateListInfo, GetList, CreateList, DeleteList, UpdateList }
+export type {
+  InitCreateListInfo,
+  GetList,
+  CreateList,
+  DeleteList,
+  UpdateList,
+  GetListById,
+  ListInfoDB,
+}
