@@ -1,24 +1,31 @@
 import { Injectable } from '@nestjs/common'
-import { InjectConnection } from '@nestjs/mongoose'
-import { Connection } from 'mongoose'
+import { InjectModel } from '@nestjs/mongoose'
+import { Model } from 'mongoose'
+import { User } from '@/databases/schemas/user.schema'
 
-import type { IUserDB } from '@/user/interfaces/user.interface'
+import type { IUser } from '@/databases/schemas/user.schema'
+import { filterDocument } from '@/databases/tools/filterDocument'
 
 @Injectable()
 export class UserDBService {
-  constructor(@InjectConnection() private connection: Connection) {}
+  constructor(@InjectModel(User.name) private userModel: Model<User>) {}
 
-  async findOne(filter: object): Promise<IUserDB | null> {
-    return (await this.connection
-      .collection('user')
-      .findOne(filter)) as unknown as IUserDB | null
+  async findOne(filter: object) {
+    return await this.userModel.findOne(filter).lean().exec()
+  }
+
+  async getUserInfo(prefix: string): Promise<{ uid: string; user: string }[]> {
+    return (
+      await this.userModel
+        .find({ user: { $regex: new RegExp(`^${prefix}`, 'i') } })
+        .limit(5)
+        .lean()
+        .exec()
+    ).map(({ uid, user }) => ({ uid, user }))
   }
 
   async insertOne(data: object): Promise<boolean> {
-    const { acknowledged } = await this.connection
-      .collection('user')
-      .insertOne(data)
-
-    return acknowledged
+    const newUser = new this.userModel(data)
+    return !!(await newUser.save())
   }
 }

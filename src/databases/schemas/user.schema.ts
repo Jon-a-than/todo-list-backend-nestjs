@@ -3,6 +3,13 @@ import { HydratedDocument } from 'mongoose'
 
 export type UesrDocument = HydratedDocument<User>
 
+export interface IUser {
+  user: string
+  pwd: string
+  phone: string
+  uid: string
+}
+
 @Schema()
 export class User {
   @Prop()

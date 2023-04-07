@@ -2,8 +2,10 @@ import { Model } from 'mongoose'
 import { Injectable } from '@nestjs/common'
 import { InjectModel } from '@nestjs/mongoose'
 import { TodoList, ITodoList } from '../schemas/todoList.schema'
+import { filterDocument } from '@/databases/tools/filterDocument'
 
 import type { Types } from 'mongoose'
+import { ListInfoDB } from '@/todo/interfaces/todo.interface'
 
 @Injectable()
 export class TodoDBService {
@@ -16,11 +18,12 @@ export class TodoDBService {
         .limit(limit)
         .lean()
         .exec()
-    ).map((item) => cleanListItem(item))
+    ).map(filterDocument)
   }
 
-  async findOneById(id: Types.ObjectId) {
-    return cleanListItem(await this.todoModel.findById(id).exec())
+  async findOneById(id: Types.ObjectId): Promise<ListInfoDB | null> {
+    const document = await this.todoModel.findById(id).lean().exec()
+    return document ? filterDocument(document) : null
   }
 
   async findOneAndUpdate(id: Types.ObjectId, payload) {
@@ -39,14 +42,6 @@ export class TodoDBService {
   async createList(listInfo: ITodoList) {
     const newList = new this.todoModel(listInfo)
     return await newList.save()
-  }
-}
-
-function cleanListItem(item: any) {
-  const { _id, __v, ...omittedItem } = item
-  return {
-    id: _id,
-    ...omittedItem,
   }
 }
 
