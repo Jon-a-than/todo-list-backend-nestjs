@@ -3,9 +3,6 @@ import { InjectModel } from '@nestjs/mongoose'
 import { Model } from 'mongoose'
 import { User } from '@/databases/schemas/user.schema'
 
-import type { IUser } from '@/databases/schemas/user.schema'
-import { filterDocument } from '@/databases/tools/filterDocument'
-
 @Injectable()
 export class UserDBService {
   constructor(@InjectModel(User.name) private userModel: Model<User>) {}
