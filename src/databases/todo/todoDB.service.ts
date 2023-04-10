@@ -58,13 +58,13 @@ function typeToQuery(pageId: number, uid: string) {
     case PageId.main:
       return { createdBy: uid, important: true }
     case PageId.plan:
-      return { createdBy: uid }
+      return { createdBy: uid, endTime: { $exists: true } }
     case PageId.distribution:
       return { createdBy: { $ne: uid }, distribution: uid }
     case PageId.created:
       return { createdBy: uid, distribution: { $ne: uid } }
     case PageId.task:
-      return { createdBy: uid, type: { $lte: 10 } }
+      return { createdBy: uid, type: { $lte: 10 }, distribution: uid }
     default:
       return { createdBy: uid, type: pageId }
   }

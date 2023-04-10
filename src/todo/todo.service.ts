@@ -56,6 +56,7 @@ export class TodoService {
       important: false,
       finished: false,
       distribution: uid,
+      worker: user,
       createdAt: new Date().getTime(),
       ...reqData,
     }

@@ -17,6 +17,7 @@ interface ListInfo extends ReqData {
   createdBy: string
   important: boolean
   finished: boolean
+  worker: string
   distribution: string
 }
 

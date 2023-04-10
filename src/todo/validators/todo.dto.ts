@@ -39,6 +39,10 @@ export class CreateTodoDto {
   distribution?: string
 
   @IsOptional()
+  @Length(3, 16, { message: '用户名长度不符合要求' })
+  worker?: string
+
+  @IsOptional()
   @IsBoolean({ message: 'important参数错误' })
   important?: boolean
 

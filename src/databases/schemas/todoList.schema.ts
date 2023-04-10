@@ -11,6 +11,7 @@ export interface ITodoList {
   type: number
   important: boolean
   distribution: string
+  worker: string
   description?: string
   endTime?: number
   createdAt: number
@@ -31,6 +32,8 @@ export class TodoList implements ITodoList {
   type: number
   @Prop({ required: true })
   important: boolean
+  @Prop({ required: true })
+  worker: string
   @Prop({ required: true })
   distribution: string
   @Prop({ required: false })
