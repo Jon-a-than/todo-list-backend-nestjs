@@ -1,0 +1,26 @@
+version: '3.9'
+services:
+  nest:
+    build: .
+    networks:
+      - mongo
+      - redis
+    depends_on:
+      - redis
+      - mongodb
+    ports:
+      - '4936:4936'
+  redis:
+    image: 'redis:alpine'
+    networks:
+      - redis
+  mongodb:
+    image: 'mongo:latest'
+    restart: always
+    volumes:
+      - './mongo:/data/db'
+    networks:
+      - mongo
+networks:
+  redis:
+  mongo:
