@@ -1,14 +1,14 @@
+# TodoListBackend-NestJS
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
 
 [circleci-image]: https://img.shields.io/circleci/build/github/nestjs/nest/master?token=abc123def456
 
-# TodoListBackend-NestJS
-
 ## 开发环境
 
-`pnpm:7.30.0` + `MongoDB:6.0.5` + `Node.js:18.14.0`
+`pnpm:8.2.0` + `MongoDB:6.0.5` + `Node.js:18.14.0` + `redis:7.0.10`
 
 ## 快速开始
 
@@ -28,6 +28,20 @@ ACCESS_KEY_SECRET="含短信服务权限的accessKeySecret"
 ```
 
 ### 启动项目
+
+**本地 API 地址: `localhost:4936`**
+
+#### 👍 使用 Docker
+
+```bash
+$ docker compose up -d
+```
+
+#### 亦可本地启动
+
+1. 启动 MongoDB `port:27017`
+2. 启动 Redis `port:6379`
+3. 安装依赖并启动项目
 
 ```bash
 $ pnpm i
