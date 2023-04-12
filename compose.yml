@@ -10,6 +10,9 @@ services:
       - mongodb
     ports:
       - '4936:4936'
+    environment:
+      - MONGO_HOST=mongodb
+      - REDIS_HOST=redis
   redis:
     image: 'redis:alpine'
     networks:

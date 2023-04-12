@@ -9,9 +9,10 @@ import { TestPipeModule } from './test-pipe/test-pipe.module'
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://mongodb:27017', {
-      dbName: 'todoList',
-    }),
+    MongooseModule.forRoot(
+      `mongodb://${process.env.MONGO_HOST ?? '127.0.0.1'}:27017`,
+      { dbName: 'todoList' },
+    ),
     UserModule,
     TodoModule,
     AuthModule,
