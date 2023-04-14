@@ -55,5 +55,6 @@ export type {
   DeleteList,
   UpdateList,
   GetListById,
+  ListInfo,
   ListInfoDB,
 }
