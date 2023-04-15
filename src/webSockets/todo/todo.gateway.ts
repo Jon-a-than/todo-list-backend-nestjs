@@ -31,6 +31,7 @@ export class TodoGateway {
     @Request() { user }: JwtRequestPayload,
     @ConnectedSocket() client: Socket,
   ) {
+    client.leave([...client.rooms][0])
     client.join(user.uid)
   }
 
@@ -41,7 +42,9 @@ export class TodoGateway {
     @Request() { user }: JwtRequestPayload,
   ) {
     const listInfo = this.todoService.initCreateListInfo(data, user)
-    client.emit(
+    this.todoService.handleEmitMessage(
+      client,
+      user.uid,
       SocketEimts.createList,
       await this.todoService.createList(listInfo),
     )
@@ -53,9 +56,12 @@ export class TodoGateway {
     @ConnectedSocket() client: Socket,
     @Request() { user }: JwtRequestPayload,
   ) {
-    const { error, rooms } = await this.todoService.updateList(user.uid, data)
-    console.log(rooms)
-    client.to(rooms).emit(SocketEimts.updateList, !error)
+    this.todoService.handleEmitMessage(
+      client,
+      user.uid,
+      SocketEimts.updateList,
+      await this.todoService.updateList(user.uid, data),
+    )
   }
 
   @SubscribeMessage('todo-delete')
@@ -64,7 +70,9 @@ export class TodoGateway {
     @ConnectedSocket() client: Socket,
     @Request() { user }: JwtRequestPayload,
   ) {
-    client.emit(
+    this.todoService.handleEmitMessage(
+      client,
+      user.uid,
       SocketEimts.deleteList,
       await this.todoService.deleteList(id, user.uid),
     )

@@ -1,34 +1,49 @@
 import { TodoDBService } from '@/databases/todo/todoDB.service'
 import { Injectable } from '@nestjs/common'
 
-import type * as ListCURD from './interfaces/todo.interface'
+import type {
+  CreateList,
+  DeleteList,
+  UpdateList,
+  HandleEmitMessage,
+  InitCreateListInfo,
+} from './interfaces/todo.interface'
 
 @Injectable()
 export class TodoService {
   constructor(protected readonly todoDBService: TodoDBService) {}
 
-  createList: ListCURD.CreateList = async function (todoListInfo) {
-    return !!(await this.todoDBService.createList(todoListInfo))
+  createList: CreateList = async function (todoListInfo) {
+    const newListRes = await this.todoDBService.createList(todoListInfo)
+    return { error: !newListRes, room: todoListInfo.distribution }
   }
 
-  deleteList: ListCURD.DeleteList = async function (listId, uid) {
+  deleteList: DeleteList = async function (listId, uid) {
     const list = await this.todoDBService.findOneById(listId)
-    if (!list || list.createdBy !== uid) return false
+    if (!list || list.createdBy !== uid) return { error: true, room: uid }
     this.todoDBService.findByIdAndDelete(listId)
-    return true
+    return { room: list.distribution }
   }
 
-  updateList: ListCURD.UpdateList = async function (uid, payload) {
+  updateList: UpdateList = async function (uid, payload) {
     const list = await this.todoDBService.findOneById(payload.id)
-    if (!list || list.createdBy !== uid) return { error: true, rooms: [uid] }
+    if (!list || list.createdBy !== uid) return { error: true, room: uid }
     this.todoDBService.findOneAndUpdate(payload.id, payload)
-    return { rooms: [...new Set([uid, list.distribution])] }
+    return { room: list.distribution }
   }
 
-  initCreateListInfo: ListCURD.InitCreateListInfo = (
-    reqData,
-    { uid, user },
-  ) => {
+  handleEmitMessage: HandleEmitMessage = function (
+    client,
+    uid,
+    EMIT,
+    { error, room },
+  ) {
+    client.join(room)
+    client.in(room).emit(EMIT, !error)
+    if (room !== uid) client.leave(room)
+  }
+
+  initCreateListInfo: InitCreateListInfo = (reqData, { uid, user }) => {
     return {
       owner: user,
       createdBy: uid,
