@@ -1,6 +1,6 @@
 import { IUserDB } from '@/user/interfaces/user.interface'
-import { WsException } from '@nestjs/websockets'
 import { Types } from 'mongoose'
+import { Socket } from 'socket.io'
 
 export const enum SocketEimts {
   'createList' = 'todo-create',
@@ -31,7 +31,7 @@ type ListInfoDB = ListInfo & { id: string }
 
 interface TodoWebSocketsResponse {
   error?: boolean
-  rooms: string[]
+  room: string
 }
 
 type UpdateList = (
@@ -44,12 +44,19 @@ type InitCreateListInfo = (
   user: Omit<IUserDB, 'pwd' | '_id'>,
 ) => ListInfo
 
-type CreateList = (listInfo: ListInfo) => Promise<boolean>
+type CreateList = (listInfo: ListInfo) => Promise<TodoWebSocketsResponse>
 
 type DeleteList = (
   id: Types.ObjectId,
   uid: string,
-) => Promise<boolean | WsException>
+) => Promise<TodoWebSocketsResponse>
+
+type HandleEmitMessage = (
+  client: Socket,
+  uid: string,
+  EMIT: SocketEimts,
+  res: TodoWebSocketsResponse,
+) => void
 
 const enum PageId {
   'home',
@@ -64,6 +71,7 @@ export { PageId }
 
 export type {
   InitCreateListInfo,
+  HandleEmitMessage,
   CreateList,
   DeleteList,
   UpdateList,
