@@ -1,16 +1,15 @@
 import {
   MessageBody,
-  ConnectedSocket,
+  // ConnectedSocket,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets'
-import { Socket } from 'dgram'
+// import { Socket } from 'dgram'
 import { Request, UseGuards } from '@nestjs/common'
+import { CreateTodoDto } from '@/todo/validators/todo.dto'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
 
-import type { Types } from 'mongoose'
 import type { JwtRequestPayload } from '@/types'
-import type { ListInfo } from '@/todo/interfaces/todo.interface'
 
 @UseGuards(JwtAuthGuard)
 @WebSocketGateway({
@@ -19,15 +18,28 @@ import type { ListInfo } from '@/todo/interfaces/todo.interface'
   cors: { origin: 'http://localhost:3001' },
 })
 export class TodoGateway {
+  @SubscribeMessage('todo-create')
+  createTodo(
+    @MessageBody() data: CreateTodoDto,
+    @Request() { user }: JwtRequestPayload,
+  ) {
+    return { data, user }
+  }
+
   @SubscribeMessage('todo-update')
   updateTodo(
-    @MessageBody()
-    data: Partial<Omit<ListInfo, 'owner'>> & { id: Types.ObjectId },
-    @ConnectedSocket() client: Socket,
+    @MessageBody() data: CreateTodoDto,
     @Request() { user }: JwtRequestPayload,
   ) {
     console.log(user)
-    // console.log('data', data, user, client, args)
-    client.emit('todo-update', data, user)
+    return { data, user }
+  }
+
+  @SubscribeMessage('todo-delete')
+  deleteTodo(
+    @MessageBody() data: CreateTodoDto,
+    @Request() { user }: JwtRequestPayload,
+  ) {
+    return { data, user }
   }
 }

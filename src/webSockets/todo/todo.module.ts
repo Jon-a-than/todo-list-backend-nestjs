@@ -1,11 +1,10 @@
 import { Module } from '@nestjs/common'
 import { TodoService } from './todo.service'
 import { TodoDBModule } from '@/databases/todo/todoDB.module'
-import { TodoController } from './todo.controller'
+import { TodoGateway } from './todo.gateway'
 
 @Module({
-  controllers: [TodoController],
-  providers: [TodoService],
+  providers: [TodoService, TodoGateway],
   imports: [TodoDBModule],
 })
 export class TodoModule {}

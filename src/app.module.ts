@@ -5,7 +5,7 @@ import { AppService } from '@/app.service'
 import { UserModule } from '@/user/user.module'
 import { TodoModule } from '@/todo/todo.module'
 import { AuthModule } from '@/auth/auth.module'
-import { TestPipeModule } from './test-pipe/test-pipe.module'
+import { WebSocketsModule } from '@/webSockets/webSockets.module'
 
 @Module({
   imports: [
@@ -16,7 +16,7 @@ import { TestPipeModule } from './test-pipe/test-pipe.module'
     UserModule,
     TodoModule,
     AuthModule,
-    TestPipeModule,
+    WebSocketsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
