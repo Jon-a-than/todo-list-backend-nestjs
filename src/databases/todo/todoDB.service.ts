@@ -41,7 +41,7 @@ export class TodoDBService {
 
   async createList(listInfo: ITodoList) {
     const newList = new this.todoModel(listInfo)
-    return await newList.save()
+    return filterDocument(await newList.save())
   }
 }
 
