@@ -1,15 +1,21 @@
 import {
   MessageBody,
-  // ConnectedSocket,
+  ConnectedSocket,
   SubscribeMessage,
   WebSocketGateway,
 } from '@nestjs/websockets'
-// import { Socket } from 'dgram'
+import { Socket } from 'socket.io'
+import { TodoService } from './todo.service'
 import { Request, UseGuards } from '@nestjs/common'
-import { CreateTodoDto } from '@/todo/validators/todo.dto'
+import {
+  CreateTodoDto,
+  ListIdDto,
+  UpdateTodoDto,
+} from '@/todo/validators/todo.dto'
 import { JwtAuthGuard } from '@/auth/guards/jwt-auth.guard'
 
 import type { JwtRequestPayload } from '@/types'
+import { SocketEimts } from './interfaces/todo.interface'
 
 @UseGuards(JwtAuthGuard)
 @WebSocketGateway({
@@ -18,28 +24,49 @@ import type { JwtRequestPayload } from '@/types'
   cors: { origin: 'http://localhost:3001' },
 })
 export class TodoGateway {
+  constructor(private readonly todoService: TodoService) {}
+
+  @SubscribeMessage('join')
+  joinRoom(
+    @Request() { user }: JwtRequestPayload,
+    @ConnectedSocket() client: Socket,
+  ) {
+    client.join(user.uid)
+  }
+
   @SubscribeMessage('todo-create')
-  createTodo(
+  async createTodo(
     @MessageBody() data: CreateTodoDto,
+    @ConnectedSocket() client: Socket,
     @Request() { user }: JwtRequestPayload,
   ) {
-    return { data, user }
+    const listInfo = this.todoService.initCreateListInfo(data, user)
+    client.emit(
+      SocketEimts.createList,
+      await this.todoService.createList(listInfo),
+    )
   }
 
   @SubscribeMessage('todo-update')
-  updateTodo(
-    @MessageBody() data: CreateTodoDto,
+  async updateTodo(
+    @MessageBody() data: UpdateTodoDto,
+    @ConnectedSocket() client: Socket,
     @Request() { user }: JwtRequestPayload,
   ) {
-    console.log(user)
-    return { data, user }
+    const { error, rooms } = await this.todoService.updateList(user.uid, data)
+    console.log(rooms)
+    client.to(rooms).emit(SocketEimts.updateList, !error)
   }
 
   @SubscribeMessage('todo-delete')
-  deleteTodo(
-    @MessageBody() data: CreateTodoDto,
+  async deleteTodo(
+    @MessageBody() { id }: ListIdDto,
+    @ConnectedSocket() client: Socket,
     @Request() { user }: JwtRequestPayload,
   ) {
-    return { data, user }
+    client.emit(
+      SocketEimts.deleteList,
+      await this.todoService.deleteList(id, user.uid),
+    )
   }
 }
