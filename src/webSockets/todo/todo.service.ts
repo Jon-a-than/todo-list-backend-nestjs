@@ -27,9 +27,10 @@ export class TodoService {
 
   updateList: UpdateList = async function (uid, payload) {
     const list = await this.todoDBService.findOneById(payload.id)
-    if (!list || list.createdBy !== uid) return { error: true, room: uid }
+    if (!list || ![list.createdBy, list.distribution].includes(uid))
+      return { error: true, room: uid }
     this.todoDBService.findOneAndUpdate(payload.id, payload)
-    return { room: list.distribution }
+    return { room: list.createdBy === uid ? list.distribution : list.createdBy }
   }
 
   handleEmitMessage: HandleEmitMessage = function (
