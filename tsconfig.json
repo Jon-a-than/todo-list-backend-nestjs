@@ -1,4 +1,5 @@
 {
+  "include": ["src", "test", "e2e", "config", "env"],
   "compilerOptions": {
     "module": "commonjs",
     "declaration": true,
